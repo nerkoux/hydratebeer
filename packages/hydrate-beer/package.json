@@ -1,6 +1,6 @@
 {
   "name": "hydrate-beer-sdk",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Zero-config performance monitoring for React and Next.js",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -43,8 +43,8 @@
     "url": "https://github.com/nerkoux/hydratebeer/issues"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

@@ -1,16 +1,18 @@
 export interface HydrateBeerConfig {
-  projectKey: string;
+  projectId: string;
+  tinybirdToken: string;
+  tinybirdRegion?: string;
   sampleRate?: number;
-  endpoint?: string;
   flushInterval?: number;
   batchSize?: number;
   slowRenderThreshold?: number;
+  monitorPath?: string;
 }
 
 export interface MetricEvent {
   timestamp: number;
   sessionId: string;
-  projectKey: string;
+  projectId: string;
   userId?: string;
   eventType: 'hydration' | 'render' | 'navigation' | 'page_timing' | 'custom' | 'error';
   route: string;

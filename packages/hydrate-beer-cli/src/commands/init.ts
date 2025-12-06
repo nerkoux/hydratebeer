@@ -116,33 +116,13 @@ export async function initCommand() {
     process.exit(0);
   }
 
-  const resp = await prompts([{
-    type: "select",
-    name: "configFormat",
-    message: "Choose configuration format:",
-    choices: [
-      { title: "TypeScript (hydrate-beer.config.ts)", value: "ts" },
-      { title: "JavaScript (hydrate-beer.config.js)", value: "js" },
-      { title: "Environment variables (.env.local)", value: "env" },
-    ],
-    initial: 0,
-  }]);
+  spinner.start("Creating configuration files...");
 
-  if (!resp.configFormat) {
-    console.log(chalk.yellow("\n  Cancelled."));
-    process.exit(0);
-  }
-
-  spinner.start("Creating files...");
-
-  if (resp.configFormat === "js" || resp.configFormat === "ts") {
-    const file = resp.configFormat === "js" ? "hydrate-beer.config.js" : "hydrate-beer.config.ts";
-    const fpath = path.join(cwd, file);
-    if (!fs.existsSync(fpath)) {
-      fs.writeFileSync(fpath, CONFIG_TEMPLATE(projectId, passwordHash, tinybirdResp.token));
-      spinner.succeed(`Created ${file}`);
-    }
-  }
+  // Always create hydrate-beer.config.ts for the monitor command to read
+  const configFile = "hydrate-beer.config.ts";
+  const configPath = path.join(cwd, configFile);
+  fs.writeFileSync(configPath, CONFIG_TEMPLATE(projectId, passwordHash, tinybirdResp.token));
+  spinner.text = `Created ${configFile}`;
 
   const envPath = path.join(cwd, ".env.local");
   if (!fs.existsSync(envPath)) {
@@ -159,6 +139,8 @@ export async function initCommand() {
     }
     spinner.succeed("Updated .env.local");
   }
+  
+  spinner.succeed("Configuration files created");
 
   const gitignore = path.join(cwd, ".gitignore");
   if (fs.existsSync(gitignore)) {
@@ -175,7 +157,7 @@ export async function initCommand() {
     initial: true,
   });
 
-  if (installResp.install) {
+  if (installResp.install !== undefined && installResp.install) {
     const pm = detectPackageManager();
     spinner.start(`Installing with ${pm}...`);
     try {
@@ -187,7 +169,9 @@ export async function initCommand() {
   }
 
   console.log(chalk.green("\n✔ Done!\n"));
-  console.log(chalk.gray("  Next steps:"));
+  console.log(chalk.gray("  Configuration:"));
+  console.log(chalk.cyan(`    Project ID: ${projectId}`));
+  console.log(chalk.gray("\n  Next steps:"));
   console.log(chalk.gray("  1. Deploy Tinybird schema:"));
   console.log(chalk.cyan("     npx hydrate-beer setup-tinybird"));
   console.log(chalk.gray("  2. Add HydrateBeerProvider to your app"));

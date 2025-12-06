@@ -1,19 +1,25 @@
 import type { HydrateBeerConfig, MetricEvent } from './types';
 
 export class MetricCollector {
-  private config: Required<HydrateBeerConfig>;
+  private config: Required<Omit<HydrateBeerConfig, 'monitorPath'>> & { monitorPath?: string };
   private sessionId: string;
   private buffer: MetricEvent[] = [];
   private flushTimer: ReturnType<typeof setInterval> | null = null;
+  private endpoint: string;
 
   constructor(config: HydrateBeerConfig) {
+    const region = config.tinybirdRegion || 'us-east';
+    this.endpoint = `https://api.${region}.tinybird.co/v0/events?name=events`;
+    
     this.config = {
-      projectKey: config.projectKey,
+      projectId: config.projectId,
+      tinybirdToken: config.tinybirdToken,
+      tinybirdRegion: region,
       sampleRate: config.sampleRate ?? 1.0,
-      endpoint: config.endpoint ?? 'https://api.us-east.tinybird.co/v0/events?name=events',
       flushInterval: config.flushInterval ?? 5000,
       batchSize: config.batchSize ?? 50,
       slowRenderThreshold: config.slowRenderThreshold ?? 16,
+      monitorPath: config.monitorPath,
     };
 
     // Generate anonymous session ID
@@ -49,7 +55,7 @@ export class MetricCollector {
     return Math.random() < this.config.sampleRate;
   }
 
-  public collect(event: Omit<MetricEvent, 'sessionId' | 'projectKey' | 'timestamp'>): void {
+  public collect(event: Omit<MetricEvent, 'sessionId' | 'projectId' | 'timestamp'>): void {
     if (!this.shouldSample()) {
       return;
     }
@@ -58,7 +64,7 @@ export class MetricCollector {
       const metric: MetricEvent = {
         timestamp: Date.now(),
         sessionId: this.sessionId,
-        projectKey: this.config.projectKey,
+        projectId: this.config.projectId,
         ...event,
       };
 
@@ -97,7 +103,7 @@ export class MetricCollector {
       // Transform events to match Tinybird schema
       const tinybirdEvents = events.map(event => ({
         timestamp: new Date(event.timestamp).toISOString(),
-        projectId: this.config.projectKey,
+        projectId: this.config.projectId,
         sessionId: event.sessionId,
         userId: event.userId || '',
         eventType: event.eventType,
@@ -117,12 +123,13 @@ export class MetricCollector {
 
       if (useBeacon && typeof navigator !== 'undefined' && navigator.sendBeacon) {
         const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(this.config.endpoint, blob);
+        navigator.sendBeacon(this.endpoint, blob);
         console.log('🍺 HydrateBeer: Events sent via beacon');
       } else {
-        fetch(this.config.endpoint, {
+        fetch(this.endpoint, {
           method: 'POST',
           headers: {
+            'Authorization': `Bearer ${this.config.tinybirdToken}`,
             'Content-Type': 'application/json',
           },
           body: payload,
@@ -156,7 +163,7 @@ export class MetricCollector {
     return this.sessionId;
   }
 
-  public getConfig(): Required<HydrateBeerConfig> {
+  public getConfig() {
     return this.config;
   }
 }
