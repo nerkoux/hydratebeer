@@ -310,4 +310,5 @@ MIT © [HydrateBeer](https://hydrate.beer)
 
 ---
 
-**Made with 🍺 by developers, for developers.**
+**Made with 🍺 by developer, for developers.**
+
