@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd docsforhydrate && npm install && npm run build",
+  "outputDirectory": "docsforhydrate/.next",
+  "installCommand": "npm install --prefix docsforhydrate"
+}
