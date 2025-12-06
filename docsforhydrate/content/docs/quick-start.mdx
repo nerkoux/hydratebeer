@@ -1,0 +1,311 @@
+---
+title: Quick Start
+description: Get started with HydrateBeer in 5 minutes
+---
+
+# Quick Start
+
+Get 🍺 HydrateBeer running in your app in under 5 minutes.
+
+## Step 1: Initialize
+
+Run the CLI in your React/Next.js project:
+
+```bash
+npx hydrate-beer init
+```
+
+You'll be prompted to:
+
+1. **Enter a password** for your monitoring dashboard (min 6 characters)
+2. **Confirm your password**
+3. **Provide your Tinybird API token** (get from [tinybird.co/tokens](https://ui.tinybird.co/tokens))
+4. **Choose config format** (TypeScript/JavaScript/ENV)
+
+The CLI will:
+- Generate a unique project ID (e.g., `proj_a1b2c3d4e5f6...`)
+- Hash and save your password securely (bcrypt)
+- Create `hydrate-beer.config.ts` and `.env.local`
+- Auto-install `hydrate-beer-sdk`
+
+### Example Output
+
+```bash
+🍺 Initializing HydrateBeer...
+
+✔ Detected Next.js project
+
+  Generated Project ID: proj_a1b2c3d4e5f6789...
+
+? Enter a password to secure your monitoring dashboard: ******
+? Re-confirm your password: ******
+
+🔗 Tinybird Setup
+
+  HydrateBeer uses Tinybird to store your analytics data.
+  1. Create a FREE account at: https://tinybird.co
+  2. Copy your API token from: https://ui.tinybird.co/tokens
+
+? Enter your Tinybird API token: p.ey...
+
+? Choose configuration format: › TypeScript (hydrate-beer.config.ts)
+
+✔ Created hydrate-beer.config.ts
+✔ Created .env.local
+✔ Installed hydrate-beer-sdk
+
+✔ Done!
+
+  Next steps:
+  1. Deploy Tinybird schema:
+     npx hydrate-beer setup-tinybird
+  2. Add HydrateBeerProvider to your app
+  3. Run: npx hydrate-beer monitor
+```
+
+## Step 2: Deploy Tinybird Backend
+
+Set up your analytics infrastructure:
+
+```bash
+npx hydrate-beer setup-tinybird
+```
+
+This creates in your Tinybird account:
+- **events datasource** - Stores all performance metrics
+- **overview pipe** - Aggregated statistics
+- **realtime_metrics pipe** - Recent events feed
+
+### Example Output
+
+```bash
+🔗 Setting up Tinybird...
+
+✔ Events datasource created
+✔ Overview pipe created
+✔ Realtime metrics pipe created
+
+✔ Tinybird setup complete!
+
+  Your analytics backend is ready.
+  Run npx hydrate-beer monitor to view your dashboard.
+```
+
+## Step 3: Add the Provider
+
+### Next.js App Router
+
+Create a provider component:
+
+```typescript title="app/components/HydrateBeerProvider.tsx"
+'use client';
+
+import { HydrateBeerProvider as Provider } from "hydrate-beer-sdk/react";
+
+export function HydrateBeerProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <Provider
+      config={{
+        projectId: process.env.NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID!,
+      }}
+    >
+      {children}
+    </Provider>
+  );
+}
+```
+
+Add to your root layout:
+
+```typescript title="app/layout.tsx"
+import { HydrateBeerProvider } from "./components/HydrateBeerProvider";
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <HydrateBeerProvider>
+          {children}
+        </HydrateBeerProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Next.js Pages Router
+
+```typescript title="pages/_app.tsx"
+import { HydrateBeerProvider } from "hydrate-beer-sdk/react";
+import type { AppProps } from "next/app";
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <HydrateBeerProvider
+      config={{
+        projectId: process.env.NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID!,
+      }}
+    >
+      <Component {...pageProps} />
+    </HydrateBeerProvider>
+  );
+}
+```
+
+### React (Vite, CRA, etc.)
+
+```typescript title="src/main.tsx"
+import { HydrateBeerProvider } from "hydrate-beer-sdk/react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+
+createRoot(document.getElementById("root")!).render(
+  <HydrateBeerProvider
+    config={{
+      projectId: import.meta.env.VITE_HYDRATE_BEER_PROJECT_ID,
+    }}
+  >
+    <App />
+  </HydrateBeerProvider>
+);
+```
+
+## Step 4: Monitor Your App
+
+Open the live, password-protected dashboard:
+
+```bash
+npx hydrate-beer monitor
+```
+
+You'll be prompted for your password. After authentication, the dashboard opens showing:
+
+- **Total Events** - Count of all tracked metrics
+- **Active Sessions** - Unique user sessions
+- **Average Hydration Time** - Mean hydration duration
+- **Slow Renders** - Components rendering >16ms
+- **Recent Events** - Live feed of latest 10 events
+
+### Dashboard Features
+
+✅ **Auto-refresh** - Updates every 5 seconds  
+✅ **Session timeout** - 5 minutes of inactivity  
+✅ **Password re-prompt** - Secure re-authentication  
+✅ **Real-time data** - Direct from Tinybird pipes
+
+**Security Note:** After 5 minutes of inactivity, you'll be prompted to re-enter your password.
+
+## Track Custom Events
+
+Use the hook in any client component:
+
+```typescript
+'use client';
+
+import { useHydrateBeer } from "hydrate-beer-sdk/react";
+
+export default function MyComponent() {
+  const { trackCustomEvent, trackError } = useHydrateBeer();
+
+  const handleClick = () => {
+    trackCustomEvent("button_clicked", {
+      buttonName: "submit",
+      timestamp: Date.now(),
+    });
+  };
+
+  const handleError = (error: Error) => {
+    trackError(error, {
+      component: "MyComponent",
+      action: "submit",
+    });
+  };
+
+  return (
+    <button onClick={handleClick}>
+      Click Me
+    </button>
+  );
+}
+```
+
+## Profile Components (Optional)
+
+Wrap components to track their render performance:
+
+```typescript
+import { withHydrateBeer } from 'hydrate-beer-sdk';
+
+function MyComponent() {
+  return <div>Hello World</div>;
+}
+
+export default withHydrateBeer(MyComponent, 'MyComponent');
+```
+
+## Data Flow
+
+```
+Your App (SDK)
+    ↓ (sends events via NDJSON)
+Tinybird Events API
+    ↓ (stores in)
+Events Datasource
+    ↓ (processed by)
+Analytics Pipes
+    ↓ (read by)
+Monitor Dashboard
+    ↓ (displays to)
+Your Browser
+```
+
+## What Gets Tracked Automatically
+
+- **Hydration** - Start time, end time, duration, route
+- **Component Renders** - Duration, phase (mount/update), slow renders (>16ms)
+- **Navigation** - Route transitions, timing
+- **Page Metrics** - TTI, TTFB, DOM load events
+
+## Configuration Options
+
+Customize behavior in `hydrate-beer.config.ts`:
+
+```typescript
+export default {
+  projectId: "proj_abc123...",
+  passwordHash: "$2a$10$...",
+  tinybirdToken: "p.ey...",
+  tinybirdRegion: "us-east", // or "eu-central"
+  sampleRate: 1.0, // 0.0-1.0 (100% sampling)
+  slowRenderThreshold: 16, // ms
+  flushInterval: 5000, // ms
+  batchSize: 50, // events
+};
+```
+
+## Troubleshooting
+
+### Events not showing in dashboard?
+
+1. Check console for 🍺 HydrateBeer logs
+2. Verify `NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID` is set
+3. Ensure Tinybird schema is deployed (`setup-tinybird`)
+4. Check Tinybird token permissions
+
+### Can't access monitor?
+
+- Verify you ran `npx hydrate-beer init`
+- Check password in `hydrate-beer.config.ts`
+- Ensure port 3500 is available
+
+### Tinybird errors?
+
+- Confirm token is valid
+- Check region matches (`us-east` vs `eu-central`)
+- Verify internet connection
+
+## Next Steps
+
+- [Configuration](/docs/configuration) - Customize sampling, thresholds, batching
+- [API Reference](/docs/api) - Full SDK and CLI documentation
+- [Tracking Guide](/docs/tracking) - Advanced event tracking patterns

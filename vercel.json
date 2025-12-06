@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd docsforhydrate && npm install && npm run build",
+  "buildCommand": "cd docsforhydrate && npm run build",
   "outputDirectory": "docsforhydrate/.next",
-  "installCommand": "npm install --prefix docsforhydrate"
+  "framework": "nextjs"
 }
