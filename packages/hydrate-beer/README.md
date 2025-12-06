@@ -199,6 +199,7 @@ npx hydrate-beer-cli init    # Setup PostHog integration
 - **CLI Package:** [hydrate-beer-cli](https://www.npmjs.com/package/hydrate-beer-cli)
 - **Documentation:** [hydrate.beer](https://hydrate.beer)
 - **GitHub:** [nerkoux/hydratebeer](https://github.com/nerkoux/hydratebeer)
+- **Example Demo:** [Hydrate-Beer-Demo](https://github.com/nerkoux/Hydrate-Beer-Demo)
 - **PostHog:** [posthog.com](https://posthog.com)
 
 ## Features

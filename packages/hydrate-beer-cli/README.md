@@ -250,6 +250,7 @@ Run `npx hydrate-beer-cli init` first.
 - **Documentation:** [hydrate.beer](https://hydrate.beer)
 - **SDK Package:** [hydrate-beer](https://www.npmjs.com/package/hydrate-beer)
 - **GitHub:** [nerkoux/hydratebeer](https://github.com/nerkoux/hydratebeer)
+- **Example Demo:** [Hydrate-Beer-Demo](https://github.com/nerkoux/Hydrate-Beer-Demo)
 - **PostHog:** [posthog.com](https://posthog.com)
 
 ## License

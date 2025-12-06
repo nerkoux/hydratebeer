@@ -222,6 +222,7 @@ Only performance metrics and custom event names are tracked.
 - **NPM (SDK):** [npmjs.com/package/hydrate-beer](https://www.npmjs.com/package/hydrate-beer)
 - **NPM (CLI):** [npmjs.com/package/hydrate-beer-cli](https://www.npmjs.com/package/hydrate-beer-cli)
 - **GitHub:** [github.com/nerkoux/hydratebeer](https://github.com/nerkoux/hydratebeer)
+- **Example Demo:** [github.com/nerkoux/Hydrate-Beer-Demo](https://github.com/nerkoux/Hydrate-Beer-Demo)
 
 ## ❓ FAQ
 
