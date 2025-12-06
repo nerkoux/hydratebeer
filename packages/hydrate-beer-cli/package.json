@@ -1,6 +1,6 @@
 {
   "name": "hydrate-beer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Zero-config performance monitoring CLI for React and Next.js",
   "bin": {
     "hydrate-beer": "./dist/cli.js"
