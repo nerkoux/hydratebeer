@@ -39,7 +39,7 @@ export async function monitorCommand() {
   const config = loadConfig();
   if (!config) {
     console.log(chalk.red("✖ No configuration found"));
-    console.log(chalk.gray("  Run 'npx hydrate-beer init' first\n"));
+    console.log(chalk.gray("  Run 'npx hydrate-beer-cli init' first\n"));
     process.exit(1);
   }
 

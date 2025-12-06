@@ -5,7 +5,7 @@ Command-line tool for zero-config performance monitoring with PostHog integratio
 ## Installation
 
 ```bash
-npx hydrate-beer init
+npx hydrate-beer-cli init
 ```
 
 No need to install globally - use with `npx`.
@@ -17,7 +17,7 @@ No need to install globally - use with `npx`.
 Initialize HydrateBeer in your project with PostHog:
 
 ```bash
-npx hydrate-beer init
+npx hydrate-beer-cli init
 ```
 
 This will:
@@ -40,7 +40,7 @@ This will:
 
 ```bash
 cd my-next-app
-npx hydrate-beer init
+npx hydrate-beer-cli init
 ```
 
 You'll be prompted for:
@@ -222,7 +222,7 @@ Your App (SDK) → PostHog Batch API → PostHog Analytics → Dashboards
 ## Troubleshooting
 
 ### "Configuration not found"
-Run `npx hydrate-beer init` first.
+Run `npx hydrate-beer-cli init` first.
 
 ### "PostHog API error"
 - Check your API key is valid

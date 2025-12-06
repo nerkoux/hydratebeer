@@ -35,7 +35,7 @@ Create a free account at [posthog.com](https://posthog.com) and get your Project
 ### 2. Initialize your project
 
 ```bash
-npx hydrate-beer init
+npx hydrate-beer-cli init
 ```
 
 This will:

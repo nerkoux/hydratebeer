@@ -11,7 +11,7 @@ npm install hydrate-beer
 Or auto-install with CLI:
 
 ```bash
-npx hydrate-beer init
+npx hydrate-beer-cli init
 ```
 
 ## Quick Start
@@ -184,14 +184,14 @@ Your App (SDK) → Tinybird Events API → Analytics Pipes → Monitor Dashboard
 Initialize with the CLI:
 
 ```bash
-npx hydrate-beer init    # Setup PostHog integration
+npx hydrate-beer-cli init    # Setup PostHog integration
 ```
 
 ## PostHog Setup
 
 1. Sign up for a free PostHog account at [posthog.com](https://posthog.com)
 2. Get your Project API Key from PostHog settings
-3. Run `npx hydrate-beer init` and enter your API key
+3. Run `npx hydrate-beer-cli init` and enter your API key
 4. View your analytics in the PostHog dashboard
 
 ## Links

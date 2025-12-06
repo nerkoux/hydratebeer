@@ -74,7 +74,7 @@ export async function linkCommand(projectId: string) {
   }
 
   if (!configUpdated) {
-    spinner.warn('No configuration files found. Run: npx hydrate-beer init');
+    spinner.warn('No configuration files found. Run: npx hydrate-beer-cli init');
     process.exit(1);
   }
 

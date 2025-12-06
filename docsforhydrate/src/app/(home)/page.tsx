@@ -53,7 +53,7 @@ export default function HomePage() {
             <div className="text-left">
               <div className="text-xs text-gray-400 mb-2">Quick Install</div>
               <code className="text-green-400 font-mono text-sm">
-                npx hydrate-beer init
+                npx hydrate-beer-cli init
               </code>
             </div>
           </div>
