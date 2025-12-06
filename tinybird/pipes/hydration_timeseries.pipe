@@ -1,0 +1,8 @@
+
+NODE endpoint
+DESCRIPTION >
+    Generated from the command line
+SQL >
+    SELECT toStartOfHour(timestamp) as hour, projectId, count() as hydration_count FROM events WHERE eventType = 'hydration' GROUP BY hour, projectId
+
+    

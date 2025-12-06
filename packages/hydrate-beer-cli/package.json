@@ -1,0 +1,65 @@
+{
+  "name": "hydrate-beer",
+  "version": "1.0.1",
+  "description": "Zero-config performance monitoring CLI for React and Next.js",
+  "bin": {
+    "hydrate-beer": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "keywords": [
+    "react",
+    "nextjs",
+    "performance",
+    "monitoring",
+    "hydration",
+    "cli",
+    "pm2",
+    "devtools",
+    "analytics",
+    "observability"
+  ],
+  "author": "HydrateBeer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nerkoux/hydratebeer.git",
+    "directory": "packages/hydrate-beer-cli"
+  },
+  "homepage": "https://hydrate.beer",
+  "bugs": {
+    "url": "https://github.com/nerkoux/hydratebeer/issues"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "express": "^4.22.1",
+    "node-fetch": "^2.7.0",
+    "open": "^8.4.2",
+    "ora": "^5.4.1",
+    "prompts": "^2.4.2"
+  },
+  "peerDependencies": {
+    "hydrate-beer-sdk": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "hydrate-beer-sdk": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.10.5",
+    "@types/node-fetch": "^2.6.13",
+    "@types/prompts": "^2.4.9",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

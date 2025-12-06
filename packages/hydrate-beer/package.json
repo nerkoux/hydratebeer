@@ -1,0 +1,55 @@
+{
+  "name": "hydrate-beer-sdk",
+  "version": "1.0.1",
+  "description": "Zero-config performance monitoring for React and Next.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "react",
+    "nextjs",
+    "performance",
+    "hydration",
+    "monitoring",
+    "analytics",
+    "pm2",
+    "observability",
+    "metrics"
+  ],
+  "author": "HydrateBeer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nerkoux/hydratebeer.git",
+    "directory": "packages/hydrate-beer"
+  },
+  "homepage": "https://hydrate.beer",
+  "bugs": {
+    "url": "https://github.com/nerkoux/hydratebeer/issues"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

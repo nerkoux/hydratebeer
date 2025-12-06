@@ -1,0 +1,8 @@
+
+NODE endpoint
+DESCRIPTION >
+    Generated from the command line
+SQL >
+    SELECT projectId, eventType, route, duration, timestamp FROM events ORDER BY timestamp DESC LIMIT 100
+
+    

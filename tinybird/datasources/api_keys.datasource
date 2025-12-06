@@ -1,0 +1,16 @@
+SCHEMA >
+    `id` String,
+    `projectId` String,
+    `userId` String,
+    `name` String,
+    `key` String,
+    `hashedKey` String,
+    `createdAt` DateTime64(3),
+    `lastUsedAt` DateTime64(3),
+    `expiresAt` Nullable(DateTime64(3)),
+    `status` Enum('active', 'revoked'),
+    `permissions` String
+
+ENGINE "ReplacingMergeTree"
+ENGINE_VER "lastUsedAt"
+ENGINE_SORTING_KEY "projectId, id"

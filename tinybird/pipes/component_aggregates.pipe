@@ -1,0 +1,8 @@
+
+NODE endpoint
+DESCRIPTION >
+    Generated from the command line
+SQL >
+    SELECT projectId, componentName, count() as render_count, avg(duration) as avg_duration FROM events WHERE eventType = 'render' GROUP BY projectId, componentName
+
+    

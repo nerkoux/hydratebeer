@@ -1,0 +1,17 @@
+SCHEMA >
+    `timestamp` DateTime64(3),
+    `projectId` String,
+    `sessionId` String,
+    `userId` String,
+    `eventType` Enum('hydration', 'render', 'navigation', 'page_timing', 'error', 'custom'),
+    `route` String,
+    `componentName` String,
+    `duration` Float32,
+    `metadata` String,
+    `userAgent` String,
+    `country` String,
+    `city` String
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY timestamp, projectId, sessionId, eventType

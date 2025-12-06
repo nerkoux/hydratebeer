@@ -1,0 +1,8 @@
+
+NODE endpoint
+DESCRIPTION >
+    Generated from the command line
+SQL >
+    SELECT projectId, route, count() as sessions, avg(duration) as avg_duration FROM events WHERE eventType = 'hydration' GROUP BY projectId, route
+
+    

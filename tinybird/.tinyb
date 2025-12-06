@@ -1,0 +1,13 @@
+{
+    "host": "https://api.us-east.tinybird.co",
+    "id": "1db3b1a8-221f-44c4-9ff0-957fe6bd4948",
+    "name": "w__workspace",
+    "scope": "user",
+    "token": "p.eyJ1IjogIjFkYjNiMWE4LTIyMWYtNDRjNC05ZmYwLTk1N2ZlNmJkNDk0OCIsICJpZCI6ICJlNGFmYzQ2YS0zM2JkLTQ3NmItYWI5OC1hZjdhN2E4NTFmYjQiLCAiaG9zdCI6ICJ1c19lYXN0In0._iuUSO9mkUKehsMlKtebryHTNOJOfsiSLIyi287DKCY",
+    "tokens": {
+        "https://api.us-east.tinybird.co": "p.eyJ1IjogIjFkYjNiMWE4LTIyMWYtNDRjNC05ZmYwLTk1N2ZlNmJkNDk0OCIsICJpZCI6ICJlNGFmYzQ2YS0zM2JkLTQ3NmItYWI5OC1hZjdhN2E4NTFmYjQiLCAiaG9zdCI6ICJ1c19lYXN0In0._iuUSO9mkUKehsMlKtebryHTNOJOfsiSLIyi287DKCY"
+    },
+    "user_email": "2023pietcaakshat004@poornima.org",
+    "user_id": "4eb4ded2-6e7f-4f90-8c01-6bca58ace57a",
+    "version": "5.21.1"
+}
