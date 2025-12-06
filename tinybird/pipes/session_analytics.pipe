@@ -1,8 +1,0 @@
-
-NODE endpoint
-DESCRIPTION >
-    Generated from the command line
-SQL >
-    SELECT projectId, count(DISTINCT id) as total_sessions FROM sessions GROUP BY projectId
-
-    

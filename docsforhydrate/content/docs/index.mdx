@@ -3,9 +3,11 @@ title: Introduction
 description: Zero-config performance monitoring for React and Next.js applications
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
 # 🍺 Welcome to HydrateBeer
 
-**HydrateBeer** is a lightweight, privacy-first performance monitoring SDK that tracks hydration timing, component renders, and navigation performance in your React and Next.js applications.
+**HydrateBeer** is a lightweight, privacy-first performance monitoring SDK that tracks hydration timing, component renders, and navigation performance in your React and Next.js applications — powered by PostHog.
 
 ## What is HydrateBeer?
 
@@ -15,52 +17,48 @@ HydrateBeer helps you understand your application's performance by automatically
 - **🎨 Component Renders** - Track render durations and identify slow components  
 - **🚀 Route Transitions** - Monitor navigation timing between pages
 - **📊 Web Vitals** - Collect TTI, TTFB, and other core metrics
-- **🔐 Password-Protected Monitoring** - Secure dashboard with session timeouts
+- **🔍 Error Tracking** - Automatically capture and report errors
+- **📈 Session Analytics** - Track user sessions and engagement
 
 ## Key Features
 
-✅ **Zero Configuration** - Three commands to get started  
-✅ **Own Your Data** - Uses your FREE Tinybird account  
+✅ **Zero Configuration** - One command to get started  
+✅ **PostHog Integration** - Leverage PostHog's powerful analytics platform  
 ✅ **Framework Support** - Works with React 18+, Next.js App Router & Pages Router  
 ✅ **Lightweight** - Less than 5KB gzipped  
 ✅ **Privacy First** - No PII, props, or state captured  
-✅ **Real-time Analytics** - Live dashboard with 5-second refresh  
-✅ **Production Ready** - Silent failures, never crashes your app
+✅ **Real-time Analytics** - View metrics instantly in PostHog dashboard  
+✅ **Production Ready** - Silent failures, never crashes your app  
+✅ **Built-in Dashboards** - Pre-configured insights and visualizations
 
 ## Quick Start
 
 ### 1. Initialize your project
 
 ```bash
-npx hydrate-beer init
+npx hydrate-beer-cli init
 ```
 
 This will:
-- Auto-generate a unique project ID
-- Set up a secure password for monitoring
-- Configure Tinybird integration (free account required)
+- Prompt you to select your PostHog instance (US, EU, or Self-hosted)
+- Configure your PostHog API key
 - Install the SDK automatically
+- Create configuration files
 
-### 2. Deploy your analytics backend
-
-```bash
-npx hydrate-beer setup-tinybird
-```
-
-One-time setup that creates datasources and pipes in your Tinybird account.
-
-### 3. Add the Provider
+### 2. Add the Provider
 
 ```typescript title="app/layout.tsx"
-import { HydrateBeerProvider } from "hydrate-beer-sdk/react";
+'use client';
+
+import { HydrateBeerProvider } from "hydrate-beer/react";
 
 export default function RootLayout({ children }) {
   return (
-    <html>
+    <html lang="en">
       <body>
         <HydrateBeerProvider
           config={{
-            projectId: process.env.NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID!,
+            posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
           }}
         >
           {children}
@@ -71,31 +69,51 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### 4. Monitor your app
+### 3. View Your Analytics
 
-```bash
-npx hydrate-beer monitor
-```
+Visit your PostHog dashboard to see:
+- Real-time performance metrics
+- Component render timings
+- Navigation patterns
+- Error tracking
+- Session analytics
 
-Enter your password and view real-time performance metrics in your browser!
+<Callout type="info">
+All HydrateBeer events are prefixed with `hydratebeer_` in PostHog for easy filtering.
+</Callout>
 
 ## How It Works
 
 ```
-Your App (SDK) → Tinybird Events API → Analytics Pipes → Monitor Dashboard
+Your App (SDK) → PostHog Batch API → PostHog Analytics → Dashboards & Insights
 ```
 
 1. **SDK** collects performance metrics in your React/Next.js app
-2. **Tinybird** stores and processes data in your own account
-3. **CLI** provides password-protected monitoring dashboard
-4. **You** own all your data with full privacy
+2. **PostHog** processes and stores data in real-time
+3. **Dashboards** provide instant visibility into performance
+4. **Insights** help you optimize your application
 
-## Why HydrateBeer?
+## Why HydrateBeer + PostHog?
 
-- 🆓 **100% Free** - Uses Tinybird's generous free tier
-- 🔒 **Private** - Your data stays in your account
-- 📦 **Simple** - No complex setup or hosting required
-- 🎯 **Focused** - Built specifically for React hydration and performance
+- 🆓 **Generous Free Tier** - Up to 1M events/month free
+- 🔒 **Private** - Your data stays secure in PostHog
+- 📦 **Simple** - No complex setup or schema management
+- 🎯 **Focused** - Built specifically for React performance monitoring
+- 📊 **Powerful** - Leverage PostHog's analytics capabilities
+- 🛠️ **No Maintenance** - No backend infrastructure to manage
+
+## What Gets Tracked?
+
+HydrateBeer automatically captures:
+
+- **Page Views** - Every route navigation
+- **Navigation Timing** - Time between route transitions
+- **Component Performance** - Render durations for tracked components
+- **Errors** - Unhandled exceptions with stack traces
+- **Sessions** - User session duration and engagement
+- **Custom Events** - Your own business metrics
+
+All data is sent to PostHog with structured properties for easy analysis.
 
 ## Next Steps
 

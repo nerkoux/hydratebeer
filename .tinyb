@@ -1,0 +1,14 @@
+{
+    "host": "https://api.us-east.tinybird.co",
+    "id": "899305a6-3ce3-4c10-947a-d82a1358cfdb",
+    "name": "hello_workspaceerger",
+    "scope": "user",
+    "token": "p.eyJ1IjogIjg5OTMwNWE2LTNjZTMtNGMxMC05NDdhLWQ4MmExMzU4Y2ZkYiIsICJpZCI6ICI2NTY4NDQ5NS1mY2FjLTRmNTktYjgyMS00OTg0ZmQyODhkNzkiLCAiaG9zdCI6ICJ1c19lYXN0In0.6fImWQzJujCwOtnxDdwZZUX1xsxg1vmrurjSp2cyFVI",
+    "tokens": {
+        "https://api.us-east.tinybird.co": "p.eyJ1IjogIjg5OTMwNWE2LTNjZTMtNGMxMC05NDdhLWQ4MmExMzU4Y2ZkYiIsICJpZCI6ICI2NTY4NDQ5NS1mY2FjLTRmNTktYjgyMS00OTg0ZmQyODhkNzkiLCAiaG9zdCI6ICJ1c19lYXN0In0.6fImWQzJujCwOtnxDdwZZUX1xsxg1vmrurjSp2cyFVI"
+    },
+    "user_email": "hello@akshatmehta.com",
+    "user_id": "c25bba3c-adec-4b8d-a624-0f1e5bb0eded",
+    "user_token": "p.eyJ1IjogImMyNWJiYTNjLWFkZWMtNGI4ZC1hNjI0LTBmMWU1YmIwZWRlZCIsICJpZCI6ICIyNGVmYzAxZi1lOTQwLTQxN2YtYjExZi05NDkwYmE5ODU1MWYiLCAiaG9zdCI6ICJ1c19lYXN0In0.MGcmtXVBYAOqif9t-h8xakgdgs8shhU2i6AFlBgSdWo",
+    "version": "1.0.2"
+}

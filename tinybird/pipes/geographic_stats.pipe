@@ -1,8 +1,0 @@
-
-NODE endpoint
-DESCRIPTION >
-    Generated from the command line
-SQL >
-    SELECT projectId, country, city, count(DISTINCT sessionId) as sessions FROM events GROUP BY projectId, country, city
-
-    

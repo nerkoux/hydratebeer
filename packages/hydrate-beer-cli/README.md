@@ -1,6 +1,6 @@
 # 🍺 HydrateBeer CLI
 
-Command-line tool for zero-config performance monitoring with password-protected dashboards.
+Command-line tool for zero-config performance monitoring with PostHog integration.
 
 ## Installation
 
@@ -14,51 +14,29 @@ No need to install globally - use with `npx`.
 
 ### `init`
 
-Initialize HydrateBeer in your project:
+Initialize HydrateBeer in your project with PostHog:
 
 ```bash
 npx hydrate-beer init
 ```
 
 This will:
-- Auto-generate a unique project ID
-- Prompt for a secure password for monitoring
-- Request your Tinybird API token
-- Detect your project type (React/Next.js)
+- Prompt you to select your PostHog instance (US, EU, or Self-hosted)
+- Request your PostHog Project API Key
+- Detect your project type (React/Next.js/Vite)
 - Create `hydrate-beer.config.ts` and `.env.local`
-- Auto-install `hydrate-beer-sdk`
+- Auto-install `hydrate-beer` package
 - Update `.gitignore`
-
-### `setup-tinybird`
-
-Deploy Tinybird datasources and pipes to your account:
-
-```bash
-npx hydrate-beer setup-tinybird
-```
-
-This creates:
-- `events` datasource (stores all metrics)
-- `overview` pipe (aggregated statistics)
-- `realtime_metrics` pipe (recent events feed)
-
-### `monitor`
-
-Open password-protected monitoring dashboard:
-
-```bash
-npx hydrate-beer monitor
-```
-
-Features:
-- Password authentication
-- 5-minute session timeout
-- Auto-refresh every 5 seconds
-- Runs on `http://localhost:3500`
 
 ## Quick Start
 
-### Step 1: Initialize
+### Step 1: Get PostHog API Key
+
+1. Sign up for free at [posthog.com](https://posthog.com)
+2. Navigate to **Project Settings**
+3. Copy your **Project API Key** (starts with `phc_`)
+
+### Step 2: Initialize
 
 ```bash
 cd my-next-app
@@ -66,17 +44,8 @@ npx hydrate-beer init
 ```
 
 You'll be prompted for:
-1. **Password** - For dashboard access (min 6 characters)
-2. **Tinybird Token** - Get from [tinybird.co/tokens](https://ui.tinybird.co/tokens)
-3. **Config Format** - TypeScript, JavaScript, or ENV
-
-### Step 2: Deploy Tinybird Backend
-
-```bash
-npx hydrate-beer setup-tinybird
-```
-
-One-time setup that creates your analytics infrastructure.
+1. **PostHog Instance** - US Cloud, EU Cloud, or Self-hosted URL
+2. **PostHog API Key** - Your Project API Key from PostHog
 
 ### Step 3: Add Provider to Your App
 
@@ -84,15 +53,17 @@ One-time setup that creates your analytics infrastructure.
 
 ```typescript
 // app/layout.tsx
-import { HydrateBeerProvider } from "hydrate-beer-sdk/react";
+'use client';
+
+import { HydrateBeerProvider } from "hydrate-beer/react";
 
 export default function RootLayout({ children }) {
   return (
-    <html>
+    <html lang="en">
       <body>
         <HydrateBeerProvider
           config={{
-            projectId: process.env.NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID!,
+            posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
           }}
         >
           {children}
@@ -126,64 +97,160 @@ export default {
   tinybirdRegion: "us-east",           // or "eu-central"
   sampleRate: 1.0,                     // 0.0-1.0
   slowRenderThreshold: 16,             // ms
-  flushInterval: 5000,                 // ms
-  batchSize: 50,                       // events
+    </html>
+  );
+}
+```
+
+**Next.js Pages Router:**
+
+```typescript
+// pages/_app.tsx
+import { HydrateBeerProvider } from "hydrate-beer/react";
+import type { AppProps } from "next/app";
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <HydrateBeerProvider
+      config={{
+        posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
+      }}
+    >
+      <Component {...pageProps} />
+    </HydrateBeerProvider>
+  );
+}
+```
+
+**React/Vite:**
+
+```typescript
+// src/main.tsx
+import { HydrateBeerProvider } from "hydrate-beer/react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+
+createRoot(document.getElementById("root")!).render(
+  <HydrateBeerProvider
+    config={{
+      posthogApiKey: import.meta.env.VITE_HYDRATE_BEER_POSTHOG_API_KEY,
+    }}
+  >
+    <App />
+  </HydrateBeerProvider>
+);
+```
+
+### Step 4: View Analytics
+
+Visit your PostHog dashboard to see:
+- Real-time performance metrics
+- Page views and navigation
+- Component render timing
+- Error tracking
+- Session analytics
+
+All events are prefixed with `hydratebeer_` for easy filtering.
+
+## Configuration
+
+The CLI creates `hydrate-beer.config.ts`:
+
+```typescript
+import type { HydrateBeerConfig } from 'hydrate-beer';
+
+const config: HydrateBeerConfig = {
+  posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
+  posthogHost: 'https://us.posthog.com',  // or 'https://eu.posthog.com'
+  debug: false,
+  batchSize: 10,
+  flushInterval: 5000,
 };
+
+export default config;
 ```
 
 ### Environment Variables
 
 ```bash
 # .env.local
-NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID=proj_abc123...
-NEXT_PUBLIC_HYDRATE_BEER_TINYBIRD_TOKEN=p.ey...
+
+# For Next.js
+NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY=phc_your_api_key_here
+
+# For Vite
+VITE_HYDRATE_BEER_POSTHOG_API_KEY=phc_your_api_key_here
+
+# For Create React App
+REACT_APP_HYDRATE_BEER_POSTHOG_API_KEY=phc_your_api_key_here
 ```
 
-## Security Features
+## PostHog Setup
 
-- 🔐 **Password-protected monitoring** - Only you can access your dashboard
-- ⏱️ **5-minute session timeout** - Auto-logout after inactivity
-- 🔒 **Bcrypt password hashing** - Passwords never stored in plain text
-- 🔑 **Token-based sessions** - Secure authentication flow
+### Getting Your API Key
+
+1. Sign up at [posthog.com](https://posthog.com) (free tier: 1M events/month)
+2. Navigate to **Project Settings**
+3. Copy your **Project API Key** (starts with `phc_`)
+4. Choose your instance:
+   - **US Cloud:** `https://us.posthog.com`
+   - **EU Cloud:** `https://eu.posthog.com`
+   - **Self-hosted:** Your custom URL
+
+### Viewing Events
+
+1. Go to **Activity** → **Events**
+2. Filter by `hydratebeer_*` events
+3. Create insights and dashboards
+4. Set up alerts for errors
 
 ## Data Flow
 
 ```
-Your App (SDK) → Tinybird Events API → Analytics Pipes → Monitor Dashboard
+Your App (SDK) → PostHog Batch API → PostHog Analytics → Dashboards
 ```
 
-## Getting Tinybird Token
+## What Gets Tracked
 
-1. Create a FREE account at [tinybird.co](https://tinybird.co)
-2. Go to [Tokens page](https://ui.tinybird.co/tokens)
-3. Copy your API token
-4. Paste when prompted by `init` command
+- 📊 **Page views** - Every route navigation
+- 🚀 **Navigation** - Route transition timing
+- 🎨 **Component renders** - Performance metrics (optional)
+- 🐛 **Errors** - Unhandled exceptions (optional)
+- 📈 **Sessions** - User session tracking (optional)
+- 🎯 **Custom events** - Your business metrics
 
 ## Troubleshooting
 
 ### "Configuration not found"
 Run `npx hydrate-beer init` first.
 
-### "Tinybird API error"
-- Check your token is valid
-- Verify region is correct (`us-east` or `eu-central`)
+### "PostHog API error"
+- Check your API key is valid
+- Verify the PostHog host URL is correct
 - Ensure internet connection
+- Check PostHog instance is accessible
 
-### "Password incorrect"
-Password is hashed in config. If forgotten, re-run `init`.
+### Events not appearing
+- Enable debug mode: `debug: true` in config
+- Check browser console for errors
+- Verify API key has correct permissions
+- Check PostHog dashboard filters
 
-## What Gets Tracked
+## Features
 
-- ⚡ Hydration timing
-- 🎨 Component render performance
-- 🚀 Route navigation timing
-- 📊 Web Vitals (TTI, TTFB, etc.)
+✅ **Zero-config setup** - One command to initialize  
+✅ **PostHog integration** - Powerful analytics platform  
+✅ **Framework support** - Next.js, React, Vite, CRA  
+✅ **Auto-detection** - Detects your project type  
+✅ **Privacy-first** - No PII tracking  
+✅ **TypeScript** - Full type safety
 
 ## Links
 
 - **Documentation:** [hydrate.beer](https://hydrate.beer)
-- **SDK Package:** [hydrate-beer-sdk](https://www.npmjs.com/package/hydrate-beer-sdk)
+- **SDK Package:** [hydrate-beer](https://www.npmjs.com/package/hydrate-beer)
 - **GitHub:** [nerkoux/hydratebeer](https://github.com/nerkoux/hydratebeer)
+- **PostHog:** [posthog.com](https://posthog.com)
 
 ## License
 

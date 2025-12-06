@@ -1,25 +1,28 @@
 import type { HydrateBeerConfig, MetricEvent } from './types';
 
 export class MetricCollector {
-  private config: Required<Omit<HydrateBeerConfig, 'monitorPath'>> & { monitorPath?: string };
+  private config: Required<Omit<HydrateBeerConfig, 'posthogHost'>> & { 
+    posthogHost: string;
+  };
   private sessionId: string;
   private buffer: MetricEvent[] = [];
   private flushTimer: ReturnType<typeof setInterval> | null = null;
   private endpoint: string;
 
   constructor(config: HydrateBeerConfig) {
-    const region = config.tinybirdRegion || 'us-east';
-    this.endpoint = `https://api.${region}.tinybird.co/v0/events?name=events`;
+    const posthogHost = config.posthogHost || 'https://app.posthog.com';
+    this.endpoint = `${posthogHost}/capture/`;
     
     this.config = {
-      projectId: config.projectId,
-      tinybirdToken: config.tinybirdToken,
-      tinybirdRegion: region,
-      sampleRate: config.sampleRate ?? 1.0,
+      posthogApiKey: config.posthogApiKey,
+      posthogHost,
+      debug: config.debug ?? false,
+      batchSize: config.batchSize ?? 10,
       flushInterval: config.flushInterval ?? 5000,
-      batchSize: config.batchSize ?? 50,
-      slowRenderThreshold: config.slowRenderThreshold ?? 16,
-      monitorPath: config.monitorPath,
+      autoTrackRoutes: config.autoTrackRoutes ?? true,
+      trackComponentPerformance: config.trackComponentPerformance ?? true,
+      trackErrors: config.trackErrors ?? true,
+      trackSessions: config.trackSessions ?? true,
     };
 
     // Generate anonymous session ID
@@ -52,10 +55,10 @@ export class MetricCollector {
   }
 
   private shouldSample(): boolean {
-    return Math.random() < this.config.sampleRate;
+    return true; // Always track for PostHog
   }
 
-  public collect(event: Omit<MetricEvent, 'sessionId' | 'projectId' | 'timestamp'>): void {
+  public collect(event: Omit<MetricEvent, 'sessionId' | 'timestamp'>): void {
     if (!this.shouldSample()) {
       return;
     }
@@ -64,7 +67,6 @@ export class MetricCollector {
       const metric: MetricEvent = {
         timestamp: Date.now(),
         sessionId: this.sessionId,
-        projectId: this.config.projectId,
         ...event,
       };
 
@@ -100,50 +102,56 @@ export class MetricCollector {
       const events = [...this.buffer];
       this.buffer = [];
 
-      // Transform events to match Tinybird schema
-      const tinybirdEvents = events.map(event => ({
+      // Transform events to PostHog format
+      const posthogEvents = events.map(event => ({
+        event: `hydratebeer_${event.eventType}`,
+        properties: {
+          distinct_id: event.sessionId,
+          $session_id: event.sessionId,
+          user_id: event.userId || null,
+          route: event.route || '',
+          component_name: event.componentName || '',
+          duration: event.duration || 0,
+          timestamp: new Date(event.timestamp).toISOString(),
+          ...(event.metadata || {}),
+        },
         timestamp: new Date(event.timestamp).toISOString(),
-        projectId: this.config.projectId,
-        sessionId: event.sessionId,
-        userId: event.userId || '',
-        eventType: event.eventType,
-        route: event.route || '',
-        componentName: event.componentName || '',
-        duration: event.duration || 0,
-        metadata: event.metadata ? JSON.stringify(event.metadata) : '{}',
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-        country: '',
-        city: ''
       }));
 
-      // Tinybird Events API expects newline-delimited JSON (NDJSON)
-      const payload = tinybirdEvents.map(e => JSON.stringify(e)).join('\n');
-
-      console.log(`🍺 HydrateBeer: Sending ${events.length} events to Tinybird`);
+      console.log(`🍺 HydrateBeer: Sending ${events.length} events to PostHog`);
 
       if (useBeacon && typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        // PostHog batch endpoint
+        const payload = JSON.stringify({
+          api_key: this.config.posthogApiKey,
+          batch: posthogEvents,
+        });
         const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(this.endpoint, blob);
-        console.log('🍺 HydrateBeer: Events sent via beacon');
+        const success = navigator.sendBeacon(`${this.config.posthogHost}/batch/`, blob);
+        console.log('🍺 HydrateBeer: Events sent via beacon:', success);
       } else {
-        fetch(this.endpoint, {
+        // Use batch endpoint for better performance
+        fetch(`${this.config.posthogHost}/batch/`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.config.tinybirdToken}`,
             'Content-Type': 'application/json',
           },
-          body: payload,
+          body: JSON.stringify({
+            api_key: this.config.posthogApiKey,
+            batch: posthogEvents,
+          }),
           keepalive: true,
         })
-          .then((response) => {
+          .then(async (response) => {
             if (response.ok) {
-              console.log('🍺 HydrateBeer: Events sent successfully to Tinybird');
+              console.log('🍺 HydrateBeer: Events sent successfully to PostHog');
             } else {
-              console.warn('🍺 HydrateBeer: Tinybird returned error', response.status);
+              const responseText = await response.text();
+              console.error('🍺 HydrateBeer: PostHog returned error', response.status, responseText);
             }
           })
           .catch((error) => {
-            console.warn('🍺 HydrateBeer: Failed to send metrics', error);
+            console.error('🍺 HydrateBeer: Failed to send metrics', error);
           });
       }
     } catch (error) {

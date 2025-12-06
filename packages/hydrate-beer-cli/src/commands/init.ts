@@ -4,31 +4,19 @@ import { execSync } from "child_process";
 import chalk from "chalk";
 import ora from "ora";
 import prompts from "prompts";
-import bcrypt from "bcryptjs";
-import { randomBytes } from "crypto";
 
-function generateProjectId(): string {
-  return `proj_${randomBytes(16).toString("hex")}`;
-}
+const CONFIG_TEMPLATE = (posthogApiKey: string, posthogHost: string) => `import type { HydrateBeerConfig } from 'hydrate-beer';
 
-const CONFIG_TEMPLATE = (projectId: string, passwordHash: string, tinybirdToken: string) => `// HydrateBeer Configuration
-// Learn more: https://hydratebeer.com/docs
-
-export default {
-  projectId: "${projectId}",
-  passwordHash: "${passwordHash}",
-  tinybirdToken: "${tinybirdToken}",
-  tinybirdRegion: "us-east",
-  sampleRate: 1.0,
-  slowRenderThreshold: 16,
-  flushInterval: 5000,
-  batchSize: 50,
+const config: HydrateBeerConfig = {
+  posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
+  posthogHost: "${posthogHost}",
 };
+
+export default config;
 `;
 
-const ENV_TEMPLATE = (projectId: string, tinybirdToken: string) => `# HydrateBeer
-NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID=${projectId}
-NEXT_PUBLIC_HYDRATE_BEER_TINYBIRD_TOKEN=${tinybirdToken}
+const ENV_TEMPLATE = (posthogApiKey: string) => `# HydrateBeer with PostHog
+NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY=${posthogApiKey}
 `;
 
 function detectPackageManager(): string {
@@ -71,73 +59,79 @@ export async function initCommand() {
 
   spinner.succeed(`Detected ${isNext ? "Next.js" : "React"} project`);
 
-  // Generate project ID
-  const projectId = generateProjectId();
-  console.log(chalk.cyan(`\n  Generated Project ID: ${projectId}\n`));
+  // PostHog setup
+  console.log(chalk.blue("\n📊 PostHog Setup\n"));
+  console.log(chalk.gray("  HydrateBeer uses PostHog to store your analytics data."));
+  console.log(chalk.gray("  1. Create a FREE account at: https://posthog.com"));
+  console.log(chalk.gray("  2. Create a new project"));
+  console.log(chalk.gray("  3. Copy your Project API Key from: Project Settings -> Project API Key\n"));
 
-  // Password setup
-  const passwordResp = await prompts([
-    {
-      type: "password",
-      name: "password",
-      message: "Enter a password to secure your monitoring dashboard:",
-      validate: (value) => value.length >= 6 || "Password must be at least 6 characters",
-    },
-    {
-      type: "password",
-      name: "confirmPassword",
-      message: "Re-confirm your password:",
-      validate: (value, prev) => value === prev.password || "Passwords do not match",
-    },
-  ]);
-
-  if (!passwordResp.password || !passwordResp.confirmPassword) {
-    console.log(chalk.yellow("\n  ✖ Password setup cancelled."));
-    process.exit(0);
-  }
-
-  const passwordHash = bcrypt.hashSync(passwordResp.password, 10);
-
-  // Tinybird setup
-  console.log(chalk.blue("\n🔗 Tinybird Setup\n"));
-  console.log(chalk.gray("  HydrateBeer uses Tinybird to store your analytics data."));
-  console.log(chalk.gray("  1. Create a FREE account at: https://tinybird.co"));
-  console.log(chalk.gray("  2. Copy your API token from: https://ui.tinybird.co/tokens\n"));
-
-  const tinybirdResp = await prompts({
+  const posthogResp = await prompts({
     type: "text",
-    name: "token",
-    message: "Enter your Tinybird API token:",
-    validate: (value) => value.length > 0 || "Token is required",
+    name: "apiKey",
+    message: "Enter your PostHog Project API Key:",
+    validate: (value) => value.length > 0 || "API Key is required",
   });
 
-  if (!tinybirdResp.token) {
+  if (!posthogResp.apiKey) {
     console.log(chalk.yellow("\n  ✖ Setup cancelled."));
     process.exit(0);
   }
 
+  const hostResp = await prompts({
+    type: "select",
+    name: "host",
+    message: "Select your PostHog instance:",
+    choices: [
+      { title: "PostHog Cloud (US)", value: "https://us.posthog.com" },
+      { title: "PostHog Cloud (EU)", value: "https://eu.posthog.com" },
+      { title: "Self-hosted", value: "custom" },
+    ],
+    initial: 0,
+  });
+
+  if (!hostResp.host) {
+    console.log(chalk.yellow("\n  ✖ Setup cancelled."));
+    process.exit(0);
+  }
+
+  let posthogHost = hostResp.host;
+  if (hostResp.host === "custom") {
+    const customHostResp = await prompts({
+      type: "text",
+      name: "customHost",
+      message: "Enter your self-hosted PostHog URL:",
+      validate: (value) => value.startsWith("http") || "URL must start with http:// or https://",
+    });
+    
+    if (!customHostResp.customHost) {
+      console.log(chalk.yellow("\n  ✖ Setup cancelled."));
+      process.exit(0);
+    }
+    posthogHost = customHostResp.customHost;
+  }
+
   spinner.start("Creating configuration files...");
 
-  // Always create hydrate-beer.config.ts for the monitor command to read
   const configFile = "hydrate-beer.config.ts";
   const configPath = path.join(cwd, configFile);
-  fs.writeFileSync(configPath, CONFIG_TEMPLATE(projectId, passwordHash, tinybirdResp.token));
+  fs.writeFileSync(configPath, CONFIG_TEMPLATE(posthogResp.apiKey, posthogHost));
   spinner.text = `Created ${configFile}`;
 
   const envPath = path.join(cwd, ".env.local");
   if (!fs.existsSync(envPath)) {
-    fs.writeFileSync(envPath, ENV_TEMPLATE(projectId, tinybirdResp.token));
+    fs.writeFileSync(envPath, ENV_TEMPLATE(posthogResp.apiKey));
     spinner.succeed("Created .env.local");
   } else {
-    // Append to existing .env.local
+    // Append to existing .env.local if key doesn't exist
     const envContent = fs.readFileSync(envPath, "utf-8");
-    if (!envContent.includes("NEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID")) {
-      fs.appendFileSync(envPath, `\nNEXT_PUBLIC_HYDRATE_BEER_PROJECT_ID=${projectId}\n`);
+    if (!envContent.includes("NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY")) {
+      const newEnvLine = `\n# HydrateBeer with PostHog\nNEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY=${posthogResp.apiKey}\n`;
+      fs.appendFileSync(envPath, newEnvLine);
+      spinner.succeed("Updated .env.local with PostHog API key");
+    } else {
+      spinner.succeed(".env.local already contains PostHog API key");
     }
-    if (!envContent.includes("NEXT_PUBLIC_HYDRATE_BEER_TINYBIRD_TOKEN")) {
-      fs.appendFileSync(envPath, `NEXT_PUBLIC_HYDRATE_BEER_TINYBIRD_TOKEN=${tinybirdResp.token}\n`);
-    }
-    spinner.succeed("Updated .env.local");
   }
   
   spinner.succeed("Configuration files created");
@@ -153,7 +147,7 @@ export async function initCommand() {
   const installResp = await prompts({
     type: "confirm",
     name: "install",
-    message: "Install hydrate-beer-sdk?",
+    message: "Install hydrate-beer?",
     initial: true,
   });
 
@@ -161,19 +155,19 @@ export async function initCommand() {
     const pm = detectPackageManager();
     spinner.start(`Installing with ${pm}...`);
     try {
-      installPackage(pm, "hydrate-beer-sdk");
-      spinner.succeed("Installed hydrate-beer-sdk");
+      installPackage(pm, "hydrate-beer");
+      spinner.succeed("Installed hydrate-beer");
     } catch (e) {
       spinner.fail("Failed to install");
     }
   }
 
   console.log(chalk.green("\n✔ Done!\n"));
-  console.log(chalk.gray("  Configuration:"));
-  console.log(chalk.cyan(`    Project ID: ${projectId}`));
+  console.log(chalk.gray("  PostHog Configuration:"));
+  console.log(chalk.cyan(`    API Key: ${posthogResp.apiKey.substring(0, 10)}...`));
+  console.log(chalk.cyan(`    Host: ${posthogHost}`));
   console.log(chalk.gray("\n  Next steps:"));
-  console.log(chalk.gray("  1. Deploy Tinybird schema:"));
-  console.log(chalk.cyan("     npx hydrate-beer setup-tinybird"));
-  console.log(chalk.gray("  2. Add HydrateBeerProvider to your app"));
-  console.log(chalk.gray("  3. Run:"), chalk.cyan("npx hydrate-beer monitor\n"));
+  console.log(chalk.gray("  1. Add HydrateBeerProvider to your app (see docs)"));
+  console.log(chalk.gray("  2. View analytics in PostHog:"), chalk.cyan(posthogHost.replace('//', '//app.')));
+  console.log(chalk.gray("  3. Filter by events:"), chalk.cyan("hydratebeer_*\n"));
 }

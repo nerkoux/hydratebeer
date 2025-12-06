@@ -1,8 +1,0 @@
-
-NODE endpoint
-DESCRIPTION >
-    Generated from the command line
-SQL >
-    SELECT projectId, route, count() as page_loads FROM events WHERE eventType = 'page_timing' GROUP BY projectId, route
-
-    

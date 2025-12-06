@@ -1,12 +1,17 @@
 {
-  "name": "hydrate-beer-sdk",
-  "version": "1.0.3",
-  "description": "Zero-config performance monitoring for React and Next.js",
+  "name": "hydrate-beer",
+  "version": "2.0.2",
+  "description": "Zero-config performance monitoring for React and Next.js with PostHog",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./react": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"

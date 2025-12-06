@@ -1,20 +1,20 @@
 export interface HydrateBeerConfig {
-  projectId: string;
-  tinybirdToken: string;
-  tinybirdRegion?: string;
-  sampleRate?: number;
-  flushInterval?: number;
+  posthogApiKey: string;
+  posthogHost?: string; // defaults to https://us.posthog.com
+  debug?: boolean;
   batchSize?: number;
-  slowRenderThreshold?: number;
-  monitorPath?: string;
+  flushInterval?: number;
+  autoTrackRoutes?: boolean;
+  trackComponentPerformance?: boolean;
+  trackErrors?: boolean;
+  trackSessions?: boolean;
 }
 
 export interface MetricEvent {
   timestamp: number;
   sessionId: string;
-  projectId: string;
   userId?: string;
-  eventType: 'hydration' | 'render' | 'navigation' | 'page_timing' | 'custom' | 'error';
+  eventType: 'hydration' | 'render' | 'navigation' | 'page_timing' | 'page_view' | 'custom' | 'error';
   route: string;
   componentName?: string;
   duration: number;

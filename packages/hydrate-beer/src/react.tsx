@@ -24,6 +24,20 @@ export function HydrateBeerProvider({
     if (!initialized.current) {
       initHydrateBeer(config);
       initialized.current = true;
+
+      // Track initial page view
+      const collector = getCollector();
+      if (collector && typeof window !== 'undefined') {
+        collector.collect({
+          eventType: 'page_view',
+          route: window.location.pathname,
+          duration: 0,
+          metadata: {
+            initialLoad: true,
+            referrer: document.referrer || '',
+          },
+        });
+      }
     }
 
     return () => {

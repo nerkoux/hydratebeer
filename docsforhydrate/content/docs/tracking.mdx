@@ -1,138 +1,162 @@
 ---
 title: What Gets Tracked
-description: Learn what performance metrics 🍺 HydrateBeer collects
+description: Learn what performance metrics 🍺 HydrateBeer collects and sends to PostHog
 ---
+
+import { Callout } from 'fumadocs-ui/components/callout';
 
 # What Gets Tracked
 
-🍺 HydrateBeer automatically collects various performance metrics to help you understand your application's behavior.
+🍺 HydrateBeer automatically collects various performance metrics and sends them to PostHog for analysis.
 
 ## 🔄 Automatic Tracking
 
-These metrics are collected automatically when you add `HydrateBeerProvider`:
+These events are tracked automatically when you add `HydrateBeerProvider`:
 
-### ⚡ Hydration Performance
+### ⚡ Page Views (`hydratebeer_page_view`)
 
-Measures how long it takes for your server-rendered app to become interactive.
+Tracks every page navigation in your application.
 
-**Collected Metrics:**
-- **Start Time** - When hydration begins
-- **End Time** - When hydration completes
-- **Duration** - Total hydration time (milliseconds)
-- **Route** - The page being hydrated
-
-**Event Structure:**
-
+**PostHog Event:**
 ```json
 {
-  "eventType": "hydration",
-  "projectId": "proj_abc123...",
-  "sessionId": "sess_xyz789...",
-  "route": "/dashboard",
-  "duration": 342.5,
-  "timestamp": "2025-12-06T10:30:00.000Z",
-  "metadata": {
-    "startTime": 1234567890,
-    "endTime": 1234568232
-  }
+  "event": "hydratebeer_page_view",
+  "properties": {
+    "path": "/products",
+    "referrer": "/",
+    "sessionId": "sess_xyz789...",
+    "timestamp": "2025-01-06T10:30:00.000Z"
+  },
+  "distinct_id": "sess_xyz789...",
+  "timestamp": "2025-01-06T10:30:00.000Z"
 }
 ```
 
-### 🎨 Component Renders
+**Captured Properties:**
+- `path` - Current route/URL path
+- `referrer` - Previous page URL
+- `sessionId` - Anonymous session identifier
+- `timestamp` - ISO 8601 timestamp
 
-Tracks performance of individual React components using `React.Profiler`.
+### 🚀 Navigation (`hydratebeer_navigation`)
 
-**Collected Metrics:**
-- **Component Name** - Component being rendered
-- **Duration** - Render time (milliseconds)
-- **Phase** - Mount, update, or nested-update
-- **Slow Render Flag** - If duration exceeds threshold (default 16ms)
+Tracks route transitions and navigation timing.
 
-**Event Structure:**
-
+**PostHog Event:**
 ```json
 {
-  "eventType": "render",
-  "projectId": "proj_abc123...",
-  "sessionId": "sess_xyz789...",
-  "componentName": "ProductList",
-  "route": "/products",
-  "duration": 23.4,
-  "timestamp": "2025-12-06T10:30:01.000Z",
-  "metadata": {
-    "phase": "update",
-    "isSlow": true
-  }
-}
-```
-
-### 🚀 Route Transitions
-
-Monitors navigation between pages/routes.
-
-**Collected Metrics:**
-- **From Route** - Previous page
-- **To Route** - New page
-- **Duration** - Navigation time (milliseconds)
-
-**Event Structure:**
-
-```json
-{
-  "eventType": "navigation",
-  "projectId": "proj_abc123...",
-  "sessionId": "sess_xyz789...",
-  "route": "/products",
-  "duration": 156.3,
-  "timestamp": "2025-12-06T10:30:02.000Z",
-  "metadata": {
+  "event": "hydratebeer_navigation",
+  "properties": {
     "from": "/",
-    "to": "/products"
-  }
+    "to": "/products",
+    "duration": 156,
+    "sessionId": "sess_xyz789...",
+    "timestamp": "2025-01-06T10:30:01.000Z"
+  },
+  "distinct_id": "sess_xyz789...",
+  "timestamp": "2025-01-06T10:30:01.000Z"
 }
 ```
 
-### 📊 Page-Level Metrics
+**Captured Properties:**
+- `from` - Previous route
+- `to` - New route
+- `duration` - Navigation time in milliseconds
+- `sessionId` - Session identifier
 
-Captures browser performance metrics using `PerformanceObserver`.
+### 🎨 Component Renders (`hydratebeer_component_render`)
 
-**Collected Metrics:**
-- **Time to Interactive (TTI)** - When page becomes interactive
-- **Time to First Byte (TTFB)** - Server response time
-- **DOM Content Loaded** - DOM parsing completion
-- **Load Complete** - Full page load
+Tracks performance of React components (when enabled).
 
-**Event Structure:**
-
+**PostHog Event:**
 ```json
 {
-  "eventType": "page_timing",
-  "projectId": "proj_abc123...",
-  "sessionId": "sess_xyz789...",
-  "route": "/",
-  "duration": 1842,
-  "timestamp": "2025-12-06T10:30:03.000Z",
-  "metadata": {
-    "ttfb": 156,
-    "domContentLoaded": 890,
-    "loadComplete": 1650,
-    "type": "navigation"
-  }
+  "event": "hydratebeer_component_render",
+  "properties": {
+    "componentName": "ProductList",
+    "duration": 23.4,
+    "phase": "update",
+    "isSlow": true,
+    "sessionId": "sess_xyz789...",
+    "timestamp": "2025-01-06T10:30:02.000Z"
+  },
+  "distinct_id": "sess_xyz789...",
+  "timestamp": "2025-01-06T10:30:02.000Z"
 }
 ```
+
+**Captured Properties:**
+- `componentName` - Name of the component
+- `duration` - Render time in milliseconds
+- `phase` - Render phase ('mount' or 'update')
+- `isSlow` - Boolean flag if duration exceeds 16ms threshold
+- `sessionId` - Session identifier
+
+<Callout type="info">
+Component performance tracking uses React's Profiler API and can be disabled via `trackComponentPerformance: false` in config.
+</Callout>
+
+### 🐛 Errors (`hydratebeer_error`)
+
+Automatically captures unhandled errors and exceptions (when enabled).
+
+**PostHog Event:**
+```json
+{
+  "event": "hydratebeer_error",
+  "properties": {
+    "message": "Cannot read property 'foo' of undefined",
+    "stack": "Error: Cannot read property...\n at Component...",
+    "componentStack": "in ProductList\n in Page",
+    "sessionId": "sess_xyz789...",
+    "timestamp": "2025-01-06T10:30:03.000Z"
+  },
+  "distinct_id": "sess_xyz789...",
+  "timestamp": "2025-01-06T10:30:03.000Z"
+}
+```
+
+**Captured Properties:**
+- `message` - Error message
+- `stack` - Stack trace
+- `componentStack` - React component stack (if available)
+- `sessionId` - Session identifier
+
+### 📊 Session Start (`hydratebeer_session_start`)
+
+Triggered when a new user session begins.
+
+**PostHog Event:**
+```json
+{
+  "event": "hydratebeer_session_start",
+  "properties": {
+    "sessionId": "sess_xyz789...",
+    "userAgent": "Mozilla/5.0...",
+    "timestamp": "2025-01-06T10:30:00.000Z"
+  },
+  "distinct_id": "sess_xyz789...",
+  "timestamp": "2025-01-06T10:30:00.000Z"
+}
+```
+
+**Captured Properties:**
+- `sessionId` - Unique session identifier
+- `userAgent` - Browser user agent string
+- `timestamp` - Session start time
 
 ## 🛠️ Manual Tracking
 
-Use the `useHydrateBeer` hook for custom events:
+Use the `useHydrateBeer` hook to track custom events:
 
-### Custom Events
+### Custom Events (`hydratebeer_custom`)
 
-Track any application-specific events:
+Track application-specific business events:
 
 ```typescript
 'use client';
 
-import { useHydrateBeer } from "hydrate-beer-sdk/react";
+import { useHydrateBeer } from "hydrate-beer/react";
 
 export default function CheckoutButton() {
   const { trackCustomEvent } = useHydrateBeer();
@@ -146,6 +170,7 @@ export default function CheckoutButton() {
       duration,
       itemCount: 3,
       totalPrice: 99.99,
+      paymentMethod: "stripe",
     });
   };
 
@@ -153,14 +178,36 @@ export default function CheckoutButton() {
 }
 ```
 
+**PostHog Event:**
+```json
+{
+  "event": "hydratebeer_custom",
+  "properties": {
+    "customEventName": "checkout_completed",
+    "duration": 234,
+    "itemCount": 3,
+    "totalPrice": 99.99,
+    "paymentMethod": "stripe",
+    "sessionId": "sess_xyz789...",
+    "timestamp": "2025-01-06T10:30:04.000Z"
+  },
+  "distinct_id": "sess_xyz789...",
+  "timestamp": "2025-01-06T10:30:04.000Z"
+}
+```
+
+<Callout type="tip">
+All your custom properties are merged into the PostHog event properties, making them queryable in PostHog dashboards.
+</Callout>
+
 ### Error Tracking
 
-Track errors with context:
+Manually track errors with additional context:
 
 ```typescript
 'use client';
 
-import { useHydrateBeer } from "hydrate-beer-sdk/react";
+import { useHydrateBeer } from "hydrate-beer/react";
 
 export default function DataFetcher() {
   const { trackError } = useHydrateBeer();
@@ -169,10 +216,11 @@ export default function DataFetcher() {
     try {
       await api.getData();
     } catch (error) {
-      trackError(error, {
+      trackError(error as Error, {
         component: "DataFetcher",
         action: "fetchData",
         endpoint: "/api/data",
+        retryCount: 3,
       });
     }
   };
@@ -185,48 +233,59 @@ export default function DataFetcher() {
 
 Every event automatically includes:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `projectId` | string | Your unique project ID |
+| Property | Type | Description |
+|----------|------|-------------|
 | `sessionId` | string | Anonymous session UUID |
 | `timestamp` | string | ISO 8601 timestamp |
-| `route` | string | Current page/route |
-| `userAgent` | string | Browser user agent |
-| `country` | string | Country (if available) |
-| `city` | string | City (if available) |
+| `distinct_id` | string | PostHog user identifier (uses sessionId) |
 
-**Session ID Generation:** Uses `crypto.randomUUID()` for secure, anonymous tracking.
+**Session ID Generation:** Uses `crypto.randomUUID()` for secure, anonymous tracking. Sessions are ephemeral and not tied to user identity.
 
 ## 🔒 What Is NOT Tracked
 
 🍺 HydrateBeer is privacy-focused and **never** collects:
 
-- ❌ User identity or personal information
+- ❌ User identity or personal information (PII)
 - ❌ Component props or state values
-- ❌ Form inputs or user data
+- ❌ Form inputs or user-entered data
 - ❌ Cookies or authentication tokens
-- ❌ IP addresses
+- ❌ IP addresses (unless PostHog GeoIP is enabled)
 - ❌ Business logic or application data
 - ❌ Passwords or sensitive information
+- ❌ DOM content or screenshots
 
-**Privacy by Design:** Only performance metrics are collected.
+**Privacy by Design:** Only performance metrics and custom event names are collected.
 
 ## 📦 Data Storage & Retention
 
-- **Your Tinybird Account** - You own 100% of your data
-- **Retention** - You control retention policies
-- **Default** - Tinybird free tier: 90 days (configurable)
-- **Export** - Full data export anytime via Tinybird
+- **PostHog Cloud** - Data stored in PostHog's secure infrastructure
+- **Retention** - Based on your PostHog plan (typically 7 years on paid, 1 year on free)
+- **GDPR Compliant** - PostHog is GDPR and SOC 2 compliant
+- **Data Export** - Export your data anytime via PostHog API or UI
+- **Data Deletion** - Request data deletion through PostHog
 
-## 🎯 Sampling
+<Callout type="info">
+PostHog automatically handles data retention, backups, and compliance. You don't need to manage any infrastructure.
+</Callout>
 
-Control data volume with sampling:
+## ⚡ Batching & Sending
+
+Events are batched for network efficiency:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `batchSize` | 10 | Max events before auto-send |
+| `flushInterval` | 5000ms | Auto-send interval |
+| Auto-flush | Always | On page unload via `sendBeacon` |
+
+**Example Configuration:**
 
 ```typescript
 <HydrateBeerProvider
   config={{
-    projectId: "proj_abc123...",
-    sampleRate: 0.2, // Track 20% of sessions
+    posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
+    batchSize: 15,        // Send after 15 events
+    flushInterval: 3000,  // Or every 3 seconds
   }}
 >
   {children}
@@ -234,112 +293,191 @@ Control data volume with sampling:
 ```
 
 **How it works:**
-- Random sampling per session
-- Consistent within session (not per-event)
-- `sampleRate: 0.5` = 50% of users tracked
-
-**Recommendations:**
-- **Development:** `1.0` (100%)
-- **Production:** `0.1` - `0.5` (10-50%)
-- **High traffic:** `0.01` (1%)
-
-## ⚡ Batching & Sending
-
-Events are batched for efficiency:
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `batchSize` | 50 | Max events before auto-send |
-| `flushInterval` | 5000ms | Auto-send interval |
-| Auto-flush | Always | On page unload via `sendBeacon` |
-
-**Example:** Events are sent when either 50 events are collected OR 5 seconds pass.
+- Events are sent when either `batchSize` is reached OR `flushInterval` passes
+- On page unload, all pending events are immediately sent
+- Failed sends are retried once
 
 ## 📏 Metric Accuracy
 
-### Hydration Timing
+### Navigation Timing
 - **API:** `performance.now()`
-- **Precision:** ~1ms
-- **Measurement:** Start to `requestIdleCallback`
+- **Precision:** ~0.1ms (sub-millisecond)
+- **Measurement:** Start of navigation to route change completion
 
-### Render Timing
+### Component Render Timing
 - **API:** React Profiler
 - **Precision:** Sub-millisecond
-- **Includes:** Render time + commit time
+- **Includes:** Render time + commit phase time
 
-### Navigation Timing
-- **API:** Performance API + Router events
-- **Precision:** ~1ms
-- **Compatible:** Next.js router, React Router, History API
+### Custom Event Timing
+- **API:** `performance.now()` or `Date.now()`
+- **Precision:** Depends on your implementation
+- **Best Practice:** Use `performance.now()` for high-precision timing
 
 ## 🛡️ Silent Failures
 
 🍺 HydrateBeer is designed to **never** break your app:
 
-✅ Network errors caught and logged  
+✅ Network errors caught and logged in debug mode  
 ✅ Invalid data silently discarded  
-✅ SDK errors never throw or crash  
+✅ SDK errors never throw to your application  
 ✅ All operations wrapped in try/catch  
-✅ Failed sends retry on next batch
+✅ Failed sends logged but don't crash the app  
+✅ PostHog API errors are gracefully handled
 
-**Philosophy:** Observability should never impact user experience.
+**Philosophy:** Analytics should enhance, not impair, user experience.
 
 ## 🐛 Debug Mode
 
-Check browser console for debug logs:
+Enable debug logging to see what's being tracked:
 
+```typescript
+<HydrateBeerProvider
+  config={{
+    posthogApiKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_POSTHOG_API_KEY!,
+    debug: true,  // Enable debug logging
+  }}
+>
+  {children}
+</HydrateBeerProvider>
+```
+
+**Console output:**
 ```
 🍺 HydrateBeer: Initialized successfully
-🍺 HydrateBeer: Collected metric { eventType: 'hydration', duration: 342ms }
-🍺 HydrateBeer: Flushing 10 events to Tinybird
-🍺 HydrateBeer: Events sent successfully (200 OK)
+🍺 HydrateBeer: Collected event hydratebeer_page_view { path: '/products' }
+🍺 HydrateBeer: Flushing 10 events to PostHog
+🍺 HydrateBeer: PostHog API response: 200 OK
 ```
 
 ## 📊 Data Flow
 
 ```
-Component Render
+React Component Render
     ↓
-SDK Collector (batches events)
+SDK Event Collector (batches events)
     ↓
-Flush (every 5s or 50 events)
+Flush Trigger (every 5s or 10 events)
     ↓
-Tinybird Events API (NDJSON)
+PostHog Batch API (/batch/)
     ↓
-Events Datasource
+PostHog Events Storage
     ↓
-Analytics Pipes
-    ↓
-Monitor Dashboard
+PostHog Dashboards & Insights
 ```
 
-## 🔍 Viewing Your Data
+## 🔍 Viewing Your Data in PostHog
 
-### Via Dashboard
+### Navigate to Events
 
-```bash
-npx hydrate-beer monitor
+1. Log in to your PostHog instance
+2. Go to **Activity** → **Events**
+3. Filter by events starting with `hydratebeer_`
+
+### Create Insights
+
+**Average Navigation Time:**
+```sql
+SELECT avg(properties.duration)
+FROM events
+WHERE event = 'hydratebeer_navigation'
 ```
 
-Enter your password to view:
-- Total events and sessions
-- Average hydration time
-- Slow renders count
-- Recent events feed
+**Most Visited Pages:**
+```sql
+SELECT properties.path, count()
+FROM events
+WHERE event = 'hydratebeer_page_view'
+GROUP BY properties.path
+ORDER BY count() DESC
+```
 
-### Via Tinybird UI
+**Slow Component Renders:**
+```sql
+SELECT properties.componentName, avg(properties.duration), count()
+FROM events
+WHERE event = 'hydratebeer_component_render'
+  AND properties.isSlow = true
+GROUP BY properties.componentName
+```
 
-1. Login to [ui.tinybird.co](https://ui.tinybird.co)
-2. View raw data in `events` datasource
-3. Query with SQL or use pipes
-4. Export as CSV/JSON
+### Build Dashboards
+
+Create custom dashboards in PostHog:
+- **Performance Overview** - Page load times, navigation speed
+- **Error Tracking** - Error rates by component
+- **User Journey** - Page flow and navigation paths
+- **Component Health** - Render performance by component
+
+## Event Name Reference
+
+| Event Name | Description | Auto-Tracked |
+|------------|-------------|--------------|
+| `hydratebeer_page_view` | Page navigation | ✅ Yes |
+| `hydratebeer_navigation` | Route transition | ✅ Yes |
+| `hydratebeer_component_render` | Component render | ⚙️ Configurable |
+| `hydratebeer_error` | Error captured | ⚙️ Configurable |
+| `hydratebeer_session_start` | Session start | ⚙️ Configurable |
+| `hydratebeer_custom` | Custom events | ❌ Manual |
+
+## Best Practices
+
+### 1. Use Meaningful Event Names
+
+```typescript
+// ✅ Good - Descriptive and actionable
+trackCustomEvent('user_subscribed_premium', { plan: 'monthly' });
+trackCustomEvent('product_added_to_cart', { productId: '123' });
+
+// ❌ Bad - Too generic
+trackCustomEvent('click');
+trackCustomEvent('event');
+```
+
+### 2. Include Relevant Context
+
+```typescript
+// ✅ Good - Rich context for analysis
+trackCustomEvent('search_performed', {
+  query: 'react hooks',
+  resultsCount: 42,
+  duration: 234,
+  filters: ['recent', 'popular'],
+});
+
+// ❌ Bad - Missing useful context
+trackCustomEvent('search');
+```
+
+### 3. Don't Over-Track
+
+```typescript
+// ✅ Good - Business-critical events
+trackCustomEvent('purchase_completed', { amount: 99.99 });
+
+// ❌ Bad - Noisy, not actionable
+trackCustomEvent('mouse_moved');
+trackCustomEvent('scroll_event');
+```
+
+### 4. Handle Sensitive Data
+
+```typescript
+// ✅ Good - No PII
+trackCustomEvent('form_submitted', {
+  formType: 'contact',
+  fieldCount: 5,
+});
+
+// ❌ Bad - Contains PII
+trackCustomEvent('form_submitted', {
+  email: 'user@example.com',  // Don't track PII!
+  name: 'John Doe',
+});
+```
 
 ## Next Steps
 
-- [Configuration](/docs/configuration) - Customize sampling and thresholds
-- [API Reference](/docs/api) - Full SDK documentation
-- [Tinybird Setup](/docs/tinybird) - Advanced Tinybird configuration
-
-- [Configuration](/docs/configuration) - Adjust what gets tracked
-- [Component Profiling](/docs/profiling) - Track specific components
-- [Tinybird Setup](/docs/tinybird) - View your data
+- [Configuration Guide](/docs/configuration) - Configure tracking options
+- [API Reference](/docs/api) - Full SDK documentation  
+- [PostHog Dashboard](https://posthog.com) - View your analytics

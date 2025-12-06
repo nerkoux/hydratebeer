@@ -1,8 +1,0 @@
-
-NODE endpoint
-DESCRIPTION >
-    Generated from the command line
-SQL >
-    SELECT projectId, count() as total_events, uniq(sessionId) as total_sessions FROM events GROUP BY projectId
-
-    

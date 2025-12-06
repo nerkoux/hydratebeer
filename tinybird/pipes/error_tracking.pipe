@@ -1,8 +1,0 @@
-
-NODE endpoint
-DESCRIPTION >
-    Generated from the command line
-SQL >
-    SELECT projectId, route, count() as occurrences FROM events WHERE eventType = 'error' GROUP BY projectId, route
-
-    

@@ -4,7 +4,6 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init';
 import { monitorCommand } from './commands/monitor';
-import { setupTinybirdCommand } from './commands/setup-tinybird';
 
 const program = new Command();
 
@@ -19,13 +18,8 @@ program
   .action(initCommand);
 
 program
-  .command('setup-tinybird')
-  .description('Deploy Tinybird datasources and pipes')
-  .action(setupTinybirdCommand);
-
-program
   .command('monitor')
-  .description('Open live monitoring dashboard (like npx prisma studio)')
+  .description('Open live monitoring dashboard')
   .action(monitorCommand);
 
 program.parse(process.argv);

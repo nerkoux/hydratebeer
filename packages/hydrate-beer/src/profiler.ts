@@ -4,11 +4,10 @@ import type { MetricCollector } from './collector';
 export class ComponentTracker {
   private collector: MetricCollector;
   private renderCounts = new Map<string, number>();
-  private slowRenderThreshold: number;
+  private slowRenderThreshold = 16; // Default 16ms threshold
 
   constructor(collector: MetricCollector) {
     this.collector = collector;
-    this.slowRenderThreshold = collector.getConfig().slowRenderThreshold;
   }
 
   public createProfiler(componentName: string) {
