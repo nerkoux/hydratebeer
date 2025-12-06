@@ -1,0 +1,370 @@
+---
+title: Dashboard
+description: View and analyze your performance metrics
+---
+
+# Dashboard
+
+Access your HydrateBeer dashboard at [hydratebeer.com/dashboard](https://hydratebeer.com/dashboard).
+
+## Creating a Project
+
+1. Sign up or log in to HydrateBeer
+2. Click "Create New Project"
+3. Enter your project name and settings
+4. Copy your project ID
+
+## Linking Your App
+
+Use the CLI to link your application:
+
+```bash
+npx hydrate-beer link <your-project-id>
+```
+
+This works just like PM2:
+- Your project ID gets added to config files
+- Metrics automatically flow to your dashboard
+- No manual backend setup required
+
+## Viewing Metrics
+
+### Overview Dashboard
+
+See high-level stats:
+- Total sessions
+- Average hydration time
+- Slow renders count
+- Route performance
+
+### Hydration Performance
+
+Track how fast your app becomes interactive:
+- P50, P95, P99 metrics
+- Time series graphs
+- Per-route breakdown
+
+### Component Analytics
+
+Identify slow components:
+- Render duration stats
+- Mount vs update performance
+- Slowest components list
+
+### Route Analytics
+
+Monitor navigation performance:
+- Route transition times
+- Most visited routes
+- Navigation bottlenecks
+
+## Real-time Updates
+
+Dashboard updates in real-time as events are collected from your application.
+
+## Filtering
+
+Filter metrics by:
+- Date range
+- Route
+- Component name
+- Session ID
+
+## Sharing
+
+Share dashboard links with your team - no additional setup required.
+
+## API Access
+
+Query your data programmatically via the HydrateBeer API (coming soon).
+
+## Next Steps
+
+- [Configuration](/docs/configuration) - Adjust tracking settings
+- [API Reference](/docs/api) - SDK documentation
+
+HydrateBeer uses Tinybird to store and query performance metrics. This guide walks you through the setup.
+
+## Why Tinybird?
+
+- **Real-time Analytics** - Query data instantly
+- **Auto-scaling** - Handles any data volume
+- **SQL Queries** - Familiar query language
+- **Low Latency** - Sub-second query times
+
+## Step 1: Create Tinybird Account
+
+1. Go to [tinybird.co](https://www.tinybird.co/)
+2. Sign up for a free account
+3. Create a new workspace
+
+## Step 2: Install Tinybird CLI
+
+```bash
+pip install tinybird-cli
+```
+
+Verify installation:
+
+```bash
+tb --version
+```
+
+## Step 3: Authenticate
+
+```bash
+tb auth
+```
+
+Follow prompts to connect to your workspace.
+
+## Step 4: Deploy Data Sources
+
+Navigate to the tinybird directory:
+
+```bash
+cd tinybird
+```
+
+Deploy the events data source:
+
+```bash
+tb push datasources/events.datasource --force
+```
+
+This creates a table with schema:
+
+```sql
+CREATE TABLE events (
+  timestamp DateTime,
+  projectKey String,
+  sessionId String,
+  eventType String,
+  route String,
+  componentName String,
+  duration Float32,
+  metadata String
+)
+```
+
+## Step 5: Deploy Pipes
+
+Deploy all aggregation pipes:
+
+```bash
+tb push pipes/hydration_aggregates.pipe --force
+tb push pipes/component_aggregates.pipe --force
+tb push pipes/navigation_stats.pipe --force
+tb push pipes/hydration_timeseries.pipe --force
+tb push pipes/page_timings.pipe --force
+tb push pipes/overview.pipe --force
+```
+
+## Step 6: Create Tokens
+
+### Write Token (for SDK)
+
+```bash
+tb token create --name "sdk_write" --scope "events:write"
+```
+
+Copy the generated token.
+
+### Read Token (for dashboard)
+
+```bash
+tb token create --name "dashboard_read" --scope "*:read"
+```
+
+Copy this token too.
+
+## Step 7: Configure SDK
+
+Add tokens to your `.env.local`:
+
+```bash
+NEXT_PUBLIC_HYDRATE_BEER_KEY=your-project-key
+NEXT_PUBLIC_HYDRATE_BEER_ENDPOINT=https://api.tinybird.co/v0/events?name=events&token=YOUR_WRITE_TOKEN
+```
+
+Update SDK initialization:
+
+```typescript
+initHydrateBeer({
+  projectKey: process.env.NEXT_PUBLIC_HYDRATE_BEER_KEY!,
+  endpoint: process.env.NEXT_PUBLIC_HYDRATE_BEER_ENDPOINT,
+  sampleRate: 1.0,
+});
+```
+
+## Available Pipes
+
+### hydration_aggregates
+
+Get hydration metrics by route:
+
+```sql
+SELECT * FROM hydration_aggregates(
+  projectKey='my-app',
+  days=7
+)
+```
+
+Returns: avg, p50, p95, p99, min, max duration per route
+
+### component_aggregates
+
+Get component render statistics:
+
+```sql
+SELECT * FROM component_aggregates(
+  projectKey='my-app',
+  days=7
+)
+```
+
+Returns: render count, avg duration, slow renders per component
+
+### navigation_stats
+
+Get route transition metrics:
+
+```sql
+SELECT * FROM navigation_stats(
+  projectKey='my-app',
+  days=7
+)
+```
+
+Returns: navigation count, avg duration by route pair
+
+### hydration_timeseries
+
+Get hourly hydration performance:
+
+```sql
+SELECT * FROM hydration_timeseries(
+  projectKey='my-app',
+  hours=24
+)
+```
+
+Returns: hourly aggregates for last 24 hours
+
+### page_timings
+
+Get page-level metrics:
+
+```sql
+SELECT * FROM page_timings(
+  projectKey='my-app',
+  days=7
+)
+```
+
+Returns: TTI, TTFB, DOM timing by route
+
+### overview
+
+Get project summary:
+
+```sql
+SELECT * FROM overview(
+  projectKey='my-app',
+  days=7
+)
+```
+
+Returns: unique sessions, total events, averages
+
+## Query via API
+
+Access data programmatically:
+
+```bash
+curl "https://api.tinybird.co/v0/pipes/hydration_aggregates.json?projectKey=my-app&days=7&token=YOUR_READ_TOKEN"
+```
+
+## Verify Data Flow
+
+1. **Send test event** - Run your app with SDK
+2. **Check Tinybird** - Log into Tinybird UI
+3. **Query data**:
+
+```sql
+SELECT * FROM events 
+WHERE projectKey = 'my-app' 
+ORDER BY timestamp DESC 
+LIMIT 10
+```
+
+You should see recent events.
+
+## Data Retention
+
+Configure retention in Tinybird UI:
+
+1. Go to Data Sources → events
+2. Click Settings
+3. Set TTL (time to live)
+4. Default: 90 days
+
+## Monitoring
+
+### Check Ingestion
+
+```bash
+tb query "SELECT count() FROM events WHERE timestamp > now() - INTERVAL 1 HOUR"
+```
+
+### View Error Rate
+
+Check Tinybird logs in the UI for failed ingestions.
+
+## Costs
+
+Tinybird pricing based on:
+- Data ingested
+- Data stored
+- Queries executed
+
+Free tier includes:
+- 1GB ingestion/month
+- 10GB storage
+- 1M rows queried/month
+
+Use sampling to control costs:
+
+```typescript
+initHydrateBeer({
+  projectKey: 'prod-app',
+  sampleRate: 0.1, // 10% = 10x reduction
+});
+```
+
+## Troubleshooting
+
+### Events not showing up?
+
+1. Check browser console for errors
+2. Verify write token is correct
+3. Check Tinybird ingestion logs
+4. Test endpoint manually:
+
+```bash
+curl -X POST "https://api.tinybird.co/v0/events?name=events&token=YOUR_WRITE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"timestamp": 1234567890, "projectKey": "test"}'
+```
+
+### Queries failing?
+
+1. Verify read token has correct permissions
+2. Check pipe parameters match schema
+3. Review Tinybird query logs
+
+## Next Steps
+
+- [Query Examples](/docs/queries) - Common SQL queries
+- [Dashboard Setup](/docs/dashboard) - Build visualization dashboard
+- [API Reference](/docs/api) - SDK documentation
