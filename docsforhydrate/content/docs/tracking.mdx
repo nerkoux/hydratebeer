@@ -1,17 +1,15 @@
 ---
 title: What Gets Tracked
-description: Learn what performance metrics 🍺 HydrateBeer collects and sends to PostHog
+description: Learn what performance metrics HydrateBeer collects and sends to PostHog
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-
-
-## 🔄 Automatic Tracking
+## Automatic Tracking
 
 These events are tracked automatically when you add `HydrateBeerProvider`:
 
-### ⚡ Page Views (`hydratebeer_page_view`)
+### Page Views (`hydratebeer_page_view`)
 
 Tracks every page navigation in your application.
 
@@ -36,7 +34,7 @@ Tracks every page navigation in your application.
 - `sessionId` - Anonymous session identifier
 - `timestamp` - ISO 8601 timestamp
 
-### 🚀 Navigation (`hydratebeer_navigation`)
+### Navigation (`hydratebeer_navigation`)
 
 Tracks route transitions and navigation timing.
 
@@ -62,7 +60,7 @@ Tracks route transitions and navigation timing.
 - `duration` - Navigation time in milliseconds
 - `sessionId` - Session identifier
 
-### 🎨 Component Renders (`hydratebeer_component_render`)
+### Component Renders (`hydratebeer_component_render`)
 
 Tracks performance of React components (when enabled).
 
@@ -94,7 +92,7 @@ Tracks performance of React components (when enabled).
 Component performance tracking uses React's Profiler API and can be disabled via `trackComponentPerformance: false` in config.
 </Callout>
 
-### 🐛 Errors (`hydratebeer_error`)
+### Errors (`hydratebeer_error`)
 
 Automatically captures unhandled errors and exceptions (when enabled).
 
@@ -120,7 +118,7 @@ Automatically captures unhandled errors and exceptions (when enabled).
 - `componentStack` - React component stack (if available)
 - `sessionId` - Session identifier
 
-### 📊 Session Start (`hydratebeer_session_start`)
+### Session Start (`hydratebeer_session_start`)
 
 Triggered when a new user session begins.
 
@@ -143,7 +141,7 @@ Triggered when a new user session begins.
 - `userAgent` - Browser user agent string
 - `timestamp` - Session start time
 
-## 🛠️ Manual Tracking
+## Manual Tracking
 
 Use the `useHydrateBeer` hook to track custom events:
 
@@ -227,7 +225,7 @@ export default function DataFetcher() {
 }
 ```
 
-## 📋 Session Information
+## Session Information
 
 Every event automatically includes:
 
@@ -239,22 +237,22 @@ Every event automatically includes:
 
 **Session ID Generation:** Uses `crypto.randomUUID()` for secure, anonymous tracking. Sessions are ephemeral and not tied to user identity.
 
-## 🔒 What Is NOT Tracked
+## What Is NOT Tracked
 
-🍺 HydrateBeer is privacy-focused and **never** collects:
+HydrateBeer is privacy-focused and **never** collects:
 
-- ❌ User identity or personal information (PII)
-- ❌ Component props or state values
-- ❌ Form inputs or user-entered data
-- ❌ Cookies or authentication tokens
-- ❌ IP addresses (unless PostHog GeoIP is enabled)
-- ❌ Business logic or application data
-- ❌ Passwords or sensitive information
-- ❌ DOM content or screenshots
+- User identity or personal information (PII)
+- Component props or state values
+- Form inputs or user-entered data
+- Cookies or authentication tokens
+- IP addresses (unless PostHog GeoIP is enabled)
+- Business logic or application data
+- Passwords or sensitive information
+- DOM content or screenshots
 
 **Privacy by Design:** Only performance metrics and custom event names are collected.
 
-## 📦 Data Storage & Retention
+## Data Storage & Retention
 
 - **PostHog Cloud** - Data stored in PostHog's secure infrastructure
 - **Retention** - Based on your PostHog plan (typically 7 years on paid, 1 year on free)
@@ -266,7 +264,7 @@ Every event automatically includes:
 PostHog automatically handles data retention, backups, and compliance. You don't need to manage any infrastructure.
 </Callout>
 
-## ⚡ Batching & Sending
+## Batching & Sending
 
 Events are batched for network efficiency:
 
@@ -295,7 +293,7 @@ Events are batched for network efficiency:
 - On page unload, all pending events are immediately sent
 - Failed sends are retried once
 
-## 📏 Metric Accuracy
+## Metric Accuracy
 
 ### Navigation Timing
 - **API:** `performance.now()`
@@ -312,20 +310,20 @@ Events are batched for network efficiency:
 - **Precision:** Depends on your implementation
 - **Best Practice:** Use `performance.now()` for high-precision timing
 
-## 🛡️ Silent Failures
+## Silent Failures
 
-🍺 HydrateBeer is designed to **never** break your app:
+HydrateBeer is designed to **never** break your app:
 
-✅ Network errors caught and logged in debug mode  
-✅ Invalid data silently discarded  
-✅ SDK errors never throw to your application  
-✅ All operations wrapped in try/catch  
-✅ Failed sends logged but don't crash the app  
-✅ PostHog API errors are gracefully handled
+- Network errors caught and logged in debug mode  
+- Invalid data silently discarded  
+- SDK errors never throw to your application  
+- All operations wrapped in try/catch  
+- Failed sends logged but don't crash the app  
+- PostHog API errors are gracefully handled
 
 **Philosophy:** Analytics should enhance, not impair, user experience.
 
-## 🐛 Debug Mode
+## Debug Mode
 
 Enable debug logging to see what's being tracked:
 
@@ -342,13 +340,13 @@ Enable debug logging to see what's being tracked:
 
 **Console output:**
 ```
-🍺 HydrateBeer: Initialized successfully
-🍺 HydrateBeer: Collected event hydratebeer_page_view { path: '/products' }
-🍺 HydrateBeer: Flushing 10 events to PostHog
-🍺 HydrateBeer: PostHog API response: 200 OK
+HydrateBeer: Initialized successfully
+HydrateBeer: Collected event hydratebeer_page_view { path: '/products' }
+HydrateBeer: Flushing 10 events to PostHog
+HydrateBeer: PostHog API response: 200 OK
 ```
 
-## 📊 Data Flow
+## Data Flow
 
 ```
 React Component Render
@@ -361,12 +359,10 @@ PostHog Batch API (/batch/)
     ↓
 PostHog Events Storage
     ↓
-PostHog Dashboards & Insights
+    PostHog Dashboards & Insights
 ```
 
-## 🔍 Viewing Your Data in PostHog
-
-### Navigate to Events
+## Viewing Your Data in PostHog### Navigate to Events
 
 1. Log in to your PostHog instance
 2. Go to **Activity** → **Events**
@@ -411,12 +407,12 @@ Create custom dashboards in PostHog:
 
 | Event Name | Description | Auto-Tracked |
 |------------|-------------|--------------|
-| `hydratebeer_page_view` | Page navigation | ✅ Yes |
-| `hydratebeer_navigation` | Route transition | ✅ Yes |
-| `hydratebeer_component_render` | Component render | ⚙️ Configurable |
-| `hydratebeer_error` | Error captured | ⚙️ Configurable |
-| `hydratebeer_session_start` | Session start | ⚙️ Configurable |
-| `hydratebeer_custom` | Custom events | ❌ Manual |
+| `hydratebeer_page_view` | Page navigation | Yes |
+| `hydratebeer_navigation` | Route transition | Yes |
+| `hydratebeer_component_render` | Component render | Configurable |
+| `hydratebeer_error` | Error captured | Configurable |
+| `hydratebeer_session_start` | Session start | Configurable |
+| `hydratebeer_custom` | Custom events | Manual |
 
 ## Best Practices
 

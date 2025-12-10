@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { LLMCopyButton, ViewOptions } from '@/components/llm-components';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -16,11 +17,19 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  const path = `content/docs/${params.slug?.join('/') || 'index'}.mdx`;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
+      <div className="flex flex-row gap-2 items-center border-b pb-6">
+        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+        <ViewOptions 
+          githubUrl={`https://github.com/nerkoux/hydratebeer/tree/main/${path}`} 
+          markdownUrl={`${page.url}.mdx`} 
+        />
+      </div>
       <DocsBody>
         <MDX
           components={getMDXComponents({
