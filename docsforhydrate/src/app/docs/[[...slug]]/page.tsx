@@ -18,16 +18,17 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   const MDX = page.data.body;
   const path = `content/docs/${params.slug?.join('/') || 'index'}.mdx`;
+  const llmApiUrl = `/api/llm/${params.slug?.join('/') || 'index'}`;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pb-6">
-        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+        <LLMCopyButton markdownUrl={llmApiUrl} />
         <ViewOptions 
           githubUrl={`https://github.com/nerkoux/hydratebeer/tree/main/${path}`} 
-          markdownUrl={`${page.url}.mdx`} 
+          markdownUrl={llmApiUrl} 
         />
       </div>
       <DocsBody>
