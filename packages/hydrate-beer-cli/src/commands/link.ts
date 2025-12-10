@@ -82,7 +82,7 @@ export async function linkCommand(projectId: string) {
   console.log(chalk.cyan('📊 Project ID: ') + chalk.yellow(projectId));
   console.log(chalk.dim('\n   View analytics: https://hydratebeer.com/dashboard/' + projectId + '\n'));
   console.log(chalk.cyan('🚀 Next steps:\n'));
-  console.log('  1. Install SDK: ' + chalk.yellow('npm install hydrate-beer-sdk'));
+  console.log('  1. Install SDK: ' + chalk.yellow('npm install hydrate-beer'));
   console.log('  2. Add to your app (see docs for framework-specific setup)');
   console.log('  3. Deploy and start tracking!\n');
   console.log(chalk.dim('  Docs: https://hydratebeer.com/docs/quick-start\n'));
